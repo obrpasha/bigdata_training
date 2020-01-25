@@ -2,7 +2,6 @@ import sqlite3
 import datetime
 import lxml.etree as etree
 
-
 db_name = "python_db"
 
 
@@ -72,7 +71,6 @@ def print_verion():
 
   except BaseException as ex:
     print("Error: {}".format(ex))
-
   finally:
     conn.close()
 
@@ -102,6 +100,8 @@ def read_doctors():
 
   except BaseException as ex:
     print("read_doctors Error: {}".format(ex))
+  finally:
+    conn.close()
 
   return doctors_res
 
@@ -127,6 +127,8 @@ def read_doctor_by_id(doctor_id):
 
   except BaseException as ex:
     print("read_doctor_by_id Error: {}".format(ex))
+  finally:
+    conn.close()
 
   return doctor
 
@@ -156,6 +158,8 @@ def read_doctors_by_speciality(speciality):
 
   except BaseException as ex:
     print("read_doctors_by_speciality Error: {}".format(ex))
+  finally:
+    conn.close()
 
 
 def read_doctors_by_hospital_name(hospital_name):
@@ -191,6 +195,8 @@ def read_doctors_by_hospital_name(hospital_name):
 
   except BaseException as ex:
     print("read_doctors_by_hospital_name Error: {}".format(ex))
+  finally:
+    conn.close()
 
 
 def read_hospitals():
@@ -212,6 +218,8 @@ def read_hospitals():
 
   except BaseException as ex:
     print("read_hospitals Error: {}".format(ex))
+  finally:
+    conn.close()
 
   return hospitals_res
 
@@ -232,6 +240,8 @@ def read_hospital_by_id(hospital_id):
 
   except BaseException as ex:
     print("read_hospital_by_id Error: {}".format(ex))
+  finally:
+    conn.close()
 
   return hospital
 
@@ -245,6 +255,8 @@ def update_doctor_experience(doctor_id, experience):
         {"doctor_id": doctor_id, "experience": experience})
   except BaseException as ex:
     print("update_doctor_experience Error: {}".format(ex))
+  finally:
+    conn.close()
 
 
 def doctors_to_xml(doctors, file_path):
