@@ -24,45 +24,50 @@ def is_http_url(s):
     return False
 
 
-visited_sites = []
+class WebCrawler:
+  def __init__(self, url, concurrent_count):
+    self.__url = url
+    self.__semaphore = asyncio.Semaphore(concurrent_count)
+    self.__scanned_sites = []
 
-sem = asyncio.Semaphore(20)
+  async def start(self):
+    self.__scanned_sites = []
 
+    async with aiohttp.ClientSession() as session:
+      task = asyncio.create_task(self.__scan(session, self.__url))
+      await task
 
-
-
-async def scan_site(session, url):
-    # if sem.locked():
-    #     print("!!!!!!!!!!!!!!!!!!!!LOCKED!!!!!!!!!!!!!!!!!!!")
+  async def __scan(self, session, url):
+    # if self.__semaphore.locked():
+    #     print("Concurrency limit. Wait...")
 
     tasks = []
-    async with sem:
+    soup = None
 
+    async with self.__semaphore:
+      try:
         async with session.get(url) as response:
-          site_content = await response.text()
-          soup = BeautifulSoup(site_content, 'html.parser')
+          content = await response.text()
+          soup = BeautifulSoup(content, "html.parser")
+      except BaseException as ex:
+        print(print("Error: {}".format(ex)))
 
+      if soup is not None:
         for link in soup.find_all('a'):
-          site_url = link.get('href')
-          # print(site_url)
+          nav_url = link.get('href')
 
-          if is_http_url(site_url):
-            if site_url not in visited_sites:
-              visited_sites.append(site_url)
-              print(site_url)
-              #print(f"1 task {time.strftime('%X')}")
-              task = asyncio.create_task(
-                scan_site(session, site_url))
-              tasks.append(task)
-              #print(f"2 task {time.strftime('%X')}")
+          if is_http_url(nav_url):
+            if nav_url not in self.__scanned_sites:
+              self.__scanned_sites.append(nav_url)
+              print(nav_url)
+              tasks.append(asyncio.create_task(self.__scan(session, nav_url)))
 
     await asyncio.gather(*tasks)
 
 
 async def main():
-  async with aiohttp.ClientSession() as session:
-    task = asyncio.create_task(scan_site(session, 'http://python.org'))
-    await task
+  web_crawler = WebCrawler('http://python.org', 20)
+  await web_crawler.start()
 
 
 if __name__ == '__main__':
